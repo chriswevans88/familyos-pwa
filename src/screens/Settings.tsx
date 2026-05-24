@@ -1,9 +1,21 @@
-import { Download, Home, Import, MonitorDown, Plus, RefreshCcw, Smartphone, Trash2, Upload } from 'lucide-react';
+import {
+  BadgeCheck,
+  Download,
+  Home,
+  Import,
+  MonitorDown,
+  Plus,
+  RefreshCcw,
+  Share2,
+  Smartphone,
+  Trash2,
+  Upload
+} from 'lucide-react';
 import { useRef, useState } from 'react';
 import { memberPalette } from '../data/seed';
 import { downloadJson, parseImportedData, withFreshBriefing } from '../lib/storage';
 import type { AppData, Member, ThemePreference } from '../types';
-import { Button, Card, Field, IconButton, SectionHeader, SelectField } from '../components/ui';
+import { AppLogo, Button, Card, Field, IconButton, SectionHeader, SelectField, StatusPill } from '../components/ui';
 
 type SettingsProps = {
   data: AppData;
@@ -121,8 +133,51 @@ export function SettingsScreen({
     showMessage(accepted ? 'Install started' : 'Install prompt dismissed');
   };
 
+  const copyInstallSteps = async () => {
+    await navigator.clipboard.writeText(
+      'Install FamilyOS on iPhone: open the FamilyOS site in Safari, tap Share, choose Add to Home Screen, then tap Add. On Android or desktop Chrome, open the site and use the Install button in the browser.'
+    );
+    showMessage('Copied phone install steps');
+  };
+
   return (
     <div className="mx-auto grid max-w-5xl gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+      <Card
+        shine
+        className="isolate border-cyan-200/20 bg-[linear-gradient(135deg,rgba(103,232,249,0.2),rgba(255,255,255,0.08)_48%,rgba(110,231,183,0.12))] p-5 lg:col-span-2"
+      >
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-28 bg-[linear-gradient(0deg,rgba(5,7,11,0.52),transparent)]" />
+        <div className="flex items-start gap-3">
+          <AppLogo />
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/80">Install FamilyOS</p>
+              <StatusPill tone={installed ? 'green' : 'cyan'}>{installed ? 'Installed' : 'PWA ready'}</StatusPill>
+            </div>
+            <h2 className="mt-2 text-3xl font-black leading-tight text-white">Put the command center on your phone.</h2>
+            <p className="mt-2 text-sm leading-6 text-white/60">
+              It launches like an app, keeps the dark standalone interface, and stores household data on this device.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-3">
+          <InstallStep icon={<Share2 size={18} />} title="iPhone" body="Open FamilyOS in Safari, tap Share, then Add to Home Screen." />
+          <InstallStep icon={<Smartphone size={18} />} title="Android" body="Open FamilyOS in Chrome and tap Install app when prompted." />
+          <InstallStep icon={<BadgeCheck size={18} />} title="After install" body="Launch from the Home Screen and use it like a private household app." />
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:max-w-xl">
+          <Button disabled={!canInstall || installed} onClick={handleInstall} icon={<MonitorDown size={16} />}>
+            {installed ? 'Installed' : canInstall ? 'Install FamilyOS' : 'Install when available'}
+          </Button>
+          <Button variant="secondary" icon={<Home size={16} />} onClick={copyInstallSteps}>
+            Copy phone steps
+          </Button>
+        </div>
+        {message && <p className="mt-4 rounded-lg bg-emerald-300/10 p-3 text-sm font-semibold text-emerald-100">{message}</p>}
+      </Card>
+
       <section className="grid content-start gap-5">
         <Card className="p-5">
           <SectionHeader title="Household" eyebrow="Settings" />
@@ -176,29 +231,6 @@ export function SettingsScreen({
 
       <section className="grid content-start gap-5">
         <Card className="p-5">
-          <div className="flex items-start gap-3">
-            <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-cyan-300 text-ink-950">
-              <Smartphone size={23} />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-200/80">Install FamilyOS</p>
-              <h2 className="mt-1 text-2xl font-black text-white">Make it feel native</h2>
-              <p className="mt-2 text-sm leading-6 text-white/60">
-                On iPhone, open Share and choose Add to Home Screen. On Android or desktop Chrome, use Install when the browser offers it.
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <Button disabled={!canInstall || installed} onClick={handleInstall} icon={<MonitorDown size={16} />}>
-              {installed ? 'Installed' : canInstall ? 'Install FamilyOS' : 'Install when available'}
-            </Button>
-            <Button variant="secondary" icon={<Home size={16} />} onClick={() => showMessage('Tip saved here: use Share, then Add to Home Screen on iPhone.')}>
-              iPhone tip
-            </Button>
-          </div>
-        </Card>
-
-        <Card className="p-5">
           <SectionHeader title="Local data" eyebrow="Backup" />
           <p className="mt-2 text-sm leading-6 text-white/58">
             FamilyOS runs from this device. Export a JSON backup before switching browsers or clearing site data.
@@ -240,7 +272,6 @@ export function SettingsScreen({
             className="hidden"
             onChange={(event) => void handleImport(event.target.files?.[0])}
           />
-          {message && <p className="mt-4 rounded-lg bg-emerald-300/10 p-3 text-sm font-semibold text-emerald-100">{message}</p>}
         </Card>
 
         <Card className="p-5">
@@ -251,6 +282,18 @@ export function SettingsScreen({
           </div>
         </Card>
       </section>
+    </div>
+  );
+}
+
+function InstallStep({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  return (
+    <div className="flex gap-3 rounded-lg border border-white/10 bg-ink-950/35 p-3">
+      <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white/10 text-cyan-100">{icon}</div>
+      <div>
+        <p className="font-bold text-white">{title}</p>
+        <p className="mt-1 text-sm leading-5 text-white/58">{body}</p>
+      </div>
     </div>
   );
 }

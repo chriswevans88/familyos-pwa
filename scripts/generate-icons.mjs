@@ -154,4 +154,19 @@ writeFileSync(join(iconDir, 'icon-512.png'), makeIcon(512));
 writeFileSync(join(iconDir, 'maskable-512.png'), makeIcon(512, true));
 writeFileSync(join(iconDir, 'apple-touch-icon.png'), makeIcon(180));
 
+const favicon = makeIcon(32);
+const icoHeader = Buffer.alloc(22);
+icoHeader.writeUInt16LE(0, 0);
+icoHeader.writeUInt16LE(1, 2);
+icoHeader.writeUInt16LE(1, 4);
+icoHeader[6] = 32;
+icoHeader[7] = 32;
+icoHeader[8] = 0;
+icoHeader[9] = 0;
+icoHeader.writeUInt16LE(1, 10);
+icoHeader.writeUInt16LE(32, 12);
+icoHeader.writeUInt32LE(favicon.length, 14);
+icoHeader.writeUInt32LE(22, 18);
+writeFileSync(join(iconDir, '..', 'favicon.ico'), Buffer.concat([icoHeader, favicon]));
+
 console.log('Generated FamilyOS icons.');

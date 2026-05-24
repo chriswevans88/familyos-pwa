@@ -1,9 +1,9 @@
-import { Plus, Sparkles, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { memberPalette } from '../data/seed';
 import { createSeededData, withFreshBriefing } from '../lib/storage';
 import type { AppData, Member } from '../types';
-import { Button, Card, Field, IconButton } from '../components/ui';
+import { AppLogo, Button, Card, Field, IconButton, StatusPill } from '../components/ui';
 
 const makeMember = (index: number): Member => ({
   id: `member-${crypto.randomUUID()}`,
@@ -81,10 +81,10 @@ export function Onboarding({
     <div className="min-h-dvh bg-app-radial px-4 py-[max(1.5rem,env(safe-area-inset-top))] text-white">
       <div className="mx-auto grid max-w-3xl gap-5 py-2">
         <div className="text-center">
-          <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-lg bg-cyan-300 text-ink-950 shadow-glow">
-            <Sparkles size={25} />
+          <AppLogo className="mx-auto mb-4" size="lg" />
+          <div className="flex justify-center">
+            <StatusPill tone="cyan">FamilyOS</StatusPill>
           </div>
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-200/80">FamilyOS</p>
           <h1 className="mt-2 text-3xl font-black text-white sm:text-5xl">Run the household. Beautifully.</h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/68 sm:text-base">
             Set up the people who keep the week moving, or jump straight into the premium demo household.

@@ -6,7 +6,7 @@ import {
   format,
   isAfter,
   isSameMonth,
-  max,
+  max
 } from 'date-fns';
 import type { AppData, Budget, FamilyTask, Goal, RecurringBill, Transaction } from '../types';
 
@@ -118,19 +118,97 @@ export function goalProgress(goal: Goal) {
 }
 
 export function dataHealthScore(data: AppData) {
+  return householdHealthBreakdown(data).score;
+}
+
+export function householdHealthBreakdown(data: AppData) {
   const { income, expenses } = totalsForMonth(data.transactions);
   const budgetRatios = data.budgets.map((budget) => budgetUsage(budget, data.transactions).ratio);
   const averageBudgetRatio =
     budgetRatios.length === 0
       ? 0
       : budgetRatios.reduce((total, ratio) => total + Math.min(1.4, ratio), 0) / budgetRatios.length;
-  const cashflowScore = income === 0 ? 55 : Math.max(0, Math.min(100, ((income - expenses) / income) * 100 + 58));
+  const moneyScore = income === 0 ? 55 : Math.max(0, Math.min(100, ((income - expenses) / income) * 100 + 58));
   const taskScore = completionRate(tasksDue(data.tasks, 'week'));
   const goalScore =
     data.goals.length === 0
       ? 0
       : data.goals.reduce((total, goal) => total + goalProgress(goal), 0) / data.goals.length;
-  return Math.round(cashflowScore * 0.42 + (100 - averageBudgetRatio * 100) * 0.25 + taskScore * 0.18 + goalScore * 0.15);
+  const budgetScore = Math.max(0, Math.min(100, 100 - averageBudgetRatio * 100));
+  const manualDueSoon = upcomingBills(data.bills, 7).filter((bill) => !bill.autopay).length;
+  const billScore = Math.max(0, Math.min(100, 94 - upcomingBills(data.bills, 7).length * 8 - manualDueSoon * 12));
+  const score = Math.round(moneyScore * 0.34 + budgetScore * 0.22 + billScore * 0.16 + taskScore * 0.14 + goalScore * 0.14);
+
+  return {
+    score,
+    moneyScore: Math.round(moneyScore),
+    budgetScore: Math.round(budgetScore),
+    billScore: Math.round(billScore),
+    taskScore: Math.round(taskScore),
+    goalScore: Math.round(goalScore)
+  };
+}
+
+export function budgetBreathingRoom(data: AppData) {
+  if (data.budgets.length === 0) return 100;
+  const pressure =
+    data.budgets.reduce((total, budget) => total + Math.min(100, budgetUsage(budget, data.transactions).ratio * 100), 0) /
+    data.budgets.length;
+  return Math.max(0, Math.round(100 - pressure));
+}
+
+export function overBudgetCount(data: AppData) {
+  return data.budgets.filter((budget) => budgetUsage(budget, data.transactions).ratio > 1).length;
+}
+
+export function nextBestAction(data: AppData) {
+  const totals = totalsForMonth(data.transactions);
+  const bills = upcomingBills(data.bills, 7);
+  const manualBill = bills.find((bill) => !bill.autopay);
+  const openTask = tasksDue(data.tasks, 'today').find((task) => !task.completed);
+  const stretchedBudget = data.budgets
+    .map((budget) => ({ budget, ...budgetUsage(budget, data.transactions) }))
+    .sort((a, b) => b.ratio - a.ratio)[0];
+  const goal = nextGoalDeadline(data.goals);
+
+  if (manualBill) {
+    return {
+      title: `Confirm ${manualBill.name}`,
+      body: `${money(manualBill.amount)} is due ${dueLabel(nextBillDueDate(manualBill))}. Assign it before the week gets noisy.`,
+      tab: 'bills' as const,
+      tone: 'amber' as const
+    };
+  }
+  if (stretchedBudget && stretchedBudget.ratio > 0.85) {
+    return {
+      title: `Slow ${stretchedBudget.budget.category}`,
+      body: `${stretchedBudget.budget.category} is at ${percent(stretchedBudget.ratio * 100)} of budget. Use a low-spend dinner plan tonight.`,
+      tab: 'money' as const,
+      tone: stretchedBudget.ratio > 1 ? ('rose' as const) : ('amber' as const)
+    };
+  }
+  if (openTask) {
+    return {
+      title: openTask.title,
+      body: `Close this today to protect the household streak. It belongs to ${openTask.category.toLowerCase()}.`,
+      tab: 'tasks' as const,
+      tone: 'green' as const
+    };
+  }
+  if (goal && totals.cashflow > 0) {
+    return {
+      title: `Move ${money(Math.max(25, Math.min(250, totals.cashflow * 0.04)))} to ${goal.name}`,
+      body: `${goal.name} is ${percent(goalProgress(goal))} funded. A small transfer keeps momentum visible.`,
+      tab: 'goals' as const,
+      tone: 'cyan' as const
+    };
+  }
+  return {
+    title: 'Run a ten-minute family reset',
+    body: 'Pick tomorrow clothes, confirm the calendar, and leave the kitchen ready for morning.',
+    tab: 'briefing' as const,
+    tone: 'violet' as const
+  };
 }
 
 export function dailyAverageSpend(transactions: Transaction[]) {

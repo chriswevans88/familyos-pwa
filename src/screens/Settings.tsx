@@ -1,21 +1,30 @@
 import {
   BadgeCheck,
+  Copy,
   Download,
+  ExternalLink,
   Home,
   Import,
+  Link2,
   MonitorDown,
   Plus,
+  QrCode,
   RefreshCcw,
   Share2,
   Smartphone,
   Trash2,
   Upload
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { useRef, useState } from 'react';
 import { memberPalette } from '../data/seed';
 import { downloadJson, parseImportedData, withFreshBriefing } from '../lib/storage';
 import type { AppData, Member, ThemePreference } from '../types';
 import { AppLogo, Button, Card, Field, IconButton, SectionHeader, SelectField, StatusPill } from '../components/ui';
+
+const LIVE_APP_URL = 'https://familyos-pwa.vercel.app';
+const SHARE_COPY =
+  'FamilyOS is a premium household command center for money, bills, tasks, goals, and weekly family briefings.';
 
 type SettingsProps = {
   data: AppData;
@@ -135,9 +144,36 @@ export function SettingsScreen({
 
   const copyInstallSteps = async () => {
     await navigator.clipboard.writeText(
-      'Install FamilyOS on iPhone: open the FamilyOS site in Safari, tap Share, choose Add to Home Screen, then tap Add. On Android or desktop Chrome, open the site and use the Install button in the browser.'
+      `Install FamilyOS: open ${LIVE_APP_URL} on your phone. On iPhone, use Safari, tap Share, choose Add to Home Screen, then tap Add. On Android, open it in Chrome and use the Install app prompt or menu option.`
     );
     showMessage('Copied phone install steps');
+  };
+
+  const copyLiveUrl = async () => {
+    await navigator.clipboard.writeText(LIVE_APP_URL);
+    showMessage('Copied live FamilyOS URL');
+  };
+
+  const shareFamilyOS = async () => {
+    if (!navigator.share) {
+      await copyLiveUrl();
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: 'FamilyOS',
+        text: SHARE_COPY,
+        url: LIVE_APP_URL
+      });
+      showMessage('Opened share sheet');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        showMessage('Share dismissed');
+        return;
+      }
+      await copyLiveUrl();
+    }
   };
 
   return (
@@ -175,8 +211,56 @@ export function SettingsScreen({
             Copy phone steps
           </Button>
         </div>
-        {message && <p className="mt-4 rounded-lg bg-emerald-300/10 p-3 text-sm font-semibold text-emerald-100">{message}</p>}
       </Card>
+
+      <Card
+        shine
+        className="isolate border-emerald-200/20 bg-[linear-gradient(135deg,rgba(110,231,183,0.16),rgba(255,255,255,0.08)_50%,rgba(103,232,249,0.14))] p-5 lg:col-span-2"
+      >
+        <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill tone="green">Live demo</StatusPill>
+              <StatusPill tone="cyan">QR ready</StatusPill>
+            </div>
+            <h2 className="mt-3 text-3xl font-black leading-tight text-white">Share FamilyOS from the production app.</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/62">
+              Use the live Vercel URL for demos, phone installs, and QR codes. The app opens with demo data and can be added to the Home Screen.
+            </p>
+            <div className="mt-4 flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/35 p-3 text-sm text-white/76">
+              <Link2 size={16} className="shrink-0 text-cyan-200" />
+              <span className="min-w-0 truncate">{LIVE_APP_URL}</span>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <Button icon={<Copy size={16} />} onClick={copyLiveUrl}>
+                Copy URL
+              </Button>
+              <Button variant="secondary" icon={<Share2 size={16} />} onClick={shareFamilyOS}>
+                Share
+              </Button>
+              <Button
+                variant="secondary"
+                icon={<ExternalLink size={16} />}
+                onClick={() => window.open(LIVE_APP_URL, '_blank', 'noopener,noreferrer')}
+              >
+                Open
+              </Button>
+            </div>
+          </div>
+
+          <div className="mx-auto w-full max-w-[13.5rem] rounded-lg border border-white/10 bg-white/10 p-3 text-center">
+            <div className="rounded-lg bg-white p-3 shadow-glass">
+              <QRCodeSVG value={LIVE_APP_URL} size={168} bgColor="#ffffff" fgColor="#090b10" level="M" marginSize={3} />
+            </div>
+            <div className="mt-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-white/60">
+              <QrCode size={14} />
+              Scan live app
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {message && <p className="rounded-lg bg-emerald-300/10 p-3 text-sm font-semibold text-emerald-100 lg:col-span-2">{message}</p>}
 
       <section className="grid content-start gap-5">
         <Card className="p-5">

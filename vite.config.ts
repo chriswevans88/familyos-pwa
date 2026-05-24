@@ -12,7 +12,7 @@ export default defineConfig({
         name: 'FamilyOS',
         short_name: 'FamilyOS',
         description:
-          'A premium household command center for money, bills, chores, goals, and weekly briefings.',
+          'FamilyOS turns household money, bills, tasks, goals, and weekly decisions into one installable command center.',
         start_url: '/',
         scope: '/',
         display: 'standalone',

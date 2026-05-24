@@ -2,6 +2,8 @@
 
 FamilyOS is a premium, mobile-first household command center PWA. It combines cashflow, budgets, recurring bills, family tasks, shared goals, and a locally generated weekly family briefing into one installable app.
 
+Live production app: https://familyos-pwa.vercel.app
+
 ## Tech Stack
 
 - Vite
@@ -12,6 +14,7 @@ FamilyOS is a premium, mobile-first household command center PWA. It combines ca
 - Lucide React
 - Recharts
 - date-fns
+- qrcode.react
 - vite-plugin-pwa
 - localStorage persistence
 
@@ -41,6 +44,8 @@ npm run preview
 
 ## Vercel Deployment
 
+Production URL: https://familyos-pwa.vercel.app
+
 1. Push this repository to GitHub.
 2. Create a new Vercel project from the repo.
 3. Use these exact Vercel settings:
@@ -58,16 +63,26 @@ FamilyOS includes a web app manifest, generated PNG icons, Apple touch icon, mob
 
 On iPhone:
 
-1. Open the deployed site in Safari.
+1. Open https://familyos-pwa.vercel.app in Safari.
 2. Tap Share.
 3. Choose Add to Home Screen.
 4. Launch FamilyOS from the Home Screen.
 
 On Android or desktop Chrome:
 
-1. Open the site.
+1. Open https://familyos-pwa.vercel.app in Chrome.
 2. Use the browser Install prompt or install icon.
 3. Launch FamilyOS as a standalone app.
+
+## Sharing And QR Demo
+
+The Settings screen includes a “Share FamilyOS” card with the live Vercel URL, native sharing where supported, copy-to-clipboard, open-in-new-tab, and an in-app QR code for phone demos.
+
+For printed or slide-based demos, generate a QR code from:
+
+```text
+https://familyos-pwa.vercel.app
+```
 
 ## Demo Script
 
@@ -79,6 +94,10 @@ On Android or desktop Chrome:
 6. Tap Goals, add a contribution, and show goal progress update instantly.
 7. Tap Brief, regenerate the operating report, then copy or export it.
 8. Tap Settings to show phone install steps, JSON backup/import, and reset demo data.
+
+## 60-Second Talk Track
+
+“FamilyOS is not just a finance tracker. It is a household operating system: cashflow, recurring bills, chores, family goals, and a weekly executive briefing all update from the same local data. In the first screen you can see household health, what is due soon, who owns today’s responsibilities, how budgets are breathing, and the next best action for tonight. Then Money, Bills, Tasks, and Goals each have real add/edit/delete flows that persist on the device. The Briefing turns everything into a practical operating report, and the Settings screen lets someone install the live app, share it by QR code, export a backup, or reset the demo.”
 
 ## Data Model
 

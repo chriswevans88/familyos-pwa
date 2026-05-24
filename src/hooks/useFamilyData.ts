@@ -10,7 +10,7 @@ export function useFamilyData() {
   }, [data]);
 
   const resetDemoData = () => {
-    setData(createSeededData(true));
+    setData(createSeededData(true, 'demo'));
   };
 
   const startFresh = () => {

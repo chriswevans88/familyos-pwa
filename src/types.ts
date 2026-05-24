@@ -1,5 +1,7 @@
 export type ThemePreference = 'dark' | 'ember' | 'ocean';
 
+export type AppMode = 'onboarding' | 'guided-demo' | 'demo' | 'real';
+
 export type AppTab = 'home' | 'money' | 'bills' | 'tasks' | 'goals' | 'briefing' | 'settings';
 
 export interface Member {
@@ -93,6 +95,7 @@ export interface BriefingSnapshot {
 }
 
 export interface AppData {
+  appMode: AppMode;
   household: Household;
   transactions: Transaction[];
   budgets: Budget[];

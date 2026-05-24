@@ -31,6 +31,7 @@ export function createDemoData(setupComplete = true): AppData {
   ];
 
   const data: AppData = {
+    appMode: setupComplete ? 'demo' : 'onboarding',
     household: {
       id: 'household-demo',
       name: 'The Morgan Household',

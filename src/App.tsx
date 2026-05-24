@@ -5,6 +5,8 @@ import { useFamilyData } from './hooks/useFamilyData';
 import { useInstallPrompt } from './hooks/useInstallPrompt';
 import type { AppTab } from './types';
 import { Onboarding } from './screens/Onboarding';
+import { GuidedDemo } from './screens/GuidedDemo';
+import { createGuidedDemoData, createSeededData } from './lib/storage';
 
 const tabs: AppTab[] = ['home', 'money', 'bills', 'tasks', 'goals', 'briefing', 'settings'];
 
@@ -25,6 +27,7 @@ export default function App() {
   const { data, setData, resetDemoData, startFresh, regenerateBriefing } = useFamilyData();
   const installPrompt = useInstallPrompt();
   const [tab, setTabState] = useState<AppTab>(() => tabFromUrl());
+  const [onboardingView, setOnboardingView] = useState<'welcome' | 'household' | 'members' | 'success'>('welcome');
 
   const setTab = (next: AppTab) => {
     setTabState(next);
@@ -35,6 +38,34 @@ export default function App() {
       url.searchParams.set('tab', next);
     }
     window.history.replaceState(null, '', url);
+  };
+
+  const beginSetup = () => {
+    setOnboardingView('household');
+    setTab('home');
+    startFresh();
+  };
+
+  const enterGuidedDemo = () => {
+    setOnboardingView('welcome');
+    setTab('home');
+    setData(createGuidedDemoData());
+  };
+
+  const enterManualDemo = () => {
+    setOnboardingView('welcome');
+    setTab('home');
+    setData(createSeededData(true, 'demo'));
+  };
+
+  const exploreCurrentDemo = () => {
+    setTab('home');
+    setData((current) => ({ ...current, appMode: 'demo' }));
+  };
+
+  const finishSetup = (nextTab: AppTab) => {
+    setOnboardingView('welcome');
+    setTab(nextTab);
   };
 
   const renderScreen = () => {
@@ -67,12 +98,33 @@ export default function App() {
     }
   };
 
-  if (!data.household.setupComplete) {
-    return <Onboarding data={data} setData={setData} />;
+  if (data.appMode === 'guided-demo') {
+    return (
+      <GuidedDemo
+        data={data}
+        onExploreDemo={exploreCurrentDemo}
+        onSetupHousehold={beginSetup}
+      />
+    );
+  }
+
+  if (!data.household.setupComplete || data.appMode === 'onboarding' || onboardingView === 'success') {
+    return (
+      <Onboarding
+        key={onboardingView}
+        data={data}
+        setData={setData}
+        initialView={onboardingView}
+        onTakeGuidedDemo={enterGuidedDemo}
+        onExploreDemo={enterManualDemo}
+        onHouseholdCreated={() => setOnboardingView('success')}
+        onFinishSetup={finishSetup}
+      />
+    );
   }
 
   return (
-    <AppShell household={data.household} tab={tab} setTab={setTab}>
+    <AppShell household={data.household} appMode={data.appMode} tab={tab} setTab={setTab} onStartHousehold={beginSetup}>
       <Suspense
         fallback={
           <Card className="p-6">

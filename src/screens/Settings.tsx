@@ -226,8 +226,8 @@ export function SettingsScreen({
               <StatusPill tone="cyan">QR ready</StatusPill>
             </div>
             <h2 className="mt-3 text-3xl font-black leading-tight text-white">Share FamilyOS from the production app.</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/62">
-              Use the live Vercel URL for demos, phone installs, and QR codes. The app opens with demo data and can be added to the Home Screen.
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-white/62">
+              Use the live Vercel URL for demos, phone installs, and QR codes. The sample household is clearly marked and can be cleared anytime.
             </p>
             <div className="mt-4 flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/35 p-3 text-sm text-white/76">
               <Link2 size={16} className="shrink-0 text-cyan-200" />
@@ -338,18 +338,18 @@ export function SettingsScreen({
                 }
               }}
             >
-              Reset demo data
+              Reset sample demo
             </Button>
             <Button
               variant="danger"
               icon={<Trash2 size={16} />}
               onClick={() => {
-                if (window.confirm('Start fresh? This removes all FamilyOS data on this device and returns to setup. Export a backup first if you want to keep anything.')) {
+                if (window.confirm('Start fresh? This clears the sample/current household data on this device and returns to setup. Export a backup first if you want to keep anything.')) {
                   startFresh();
                 }
               }}
             >
-              Start fresh
+              {data.appMode === 'demo' ? 'Start fresh / leave demo' : 'Start fresh'}
             </Button>
             <Button
               variant="secondary"

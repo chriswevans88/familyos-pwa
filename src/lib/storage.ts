@@ -2,6 +2,7 @@ import { createBlankHousehold, createDemoData } from '../data/seed';
 import { generateWeeklyBriefing } from './briefing';
 import type {
   AppData,
+  AppMode,
   BillFrequency,
   FamilyTask,
   Goal,
@@ -24,17 +25,24 @@ export function withFreshBriefing(data: AppData, version = data.briefing.version
   };
 }
 
-export function createSeededData(setupComplete = true): AppData {
-  return withFreshBriefing(createDemoData(setupComplete), 1);
+export function createSeededData(setupComplete = true, appMode: AppMode = setupComplete ? 'demo' : 'onboarding'): AppData {
+  return withFreshBriefing({ ...createDemoData(setupComplete), appMode }, 1);
 }
 
-export function createBlankData(household: Partial<Household> = {}): AppData {
+export function createGuidedDemoData(): AppData {
+  return createSeededData(true, 'guided-demo');
+}
+
+export function createBlankData(household: Partial<Household> = {}, appMode?: AppMode): AppData {
   const baseHousehold = createBlankHousehold();
+  const setupComplete = typeof household.setupComplete === 'boolean' ? household.setupComplete : baseHousehold.setupComplete;
   return withFreshBriefing(
     {
+      appMode: appMode ?? (setupComplete ? 'real' : 'onboarding'),
       household: {
         ...baseHousehold,
         ...household,
+        setupComplete,
         members: household.members && household.members.length > 0 ? household.members : baseHousehold.members
       },
       transactions: [],
@@ -61,7 +69,7 @@ export function loadAppData(): AppData {
     if (!raw) return createBlankData({ setupComplete: false });
     return normalizeAppData(JSON.parse(raw), createDemoData(true));
   } catch {
-    return createSeededData(true);
+    return createBlankData({ setupComplete: false });
   }
 }
 
@@ -91,21 +99,38 @@ export function parseImportedData(text: string): AppData {
 function normalizeAppData(input: unknown, fallback: AppData): AppData {
   if (!isRecord(input)) return withFreshBriefing(fallback, fallback.briefing.version);
 
-  const household = normalizeHousehold(input.household, fallback.household);
+  const household = normalizeHousehold(input.household, createBlankHousehold());
+  const appMode = normalizeAppMode(input.appMode, input, household);
+  const missingCollectionFallback = appMode === 'demo' || appMode === 'guided-demo';
   const memberIds = new Set(household.members.map((member) => member.id));
   const fallbackMemberId = household.members[0]?.id;
 
   const data: AppData = {
-    household,
-    transactions: normalizeArray(input.transactions, fallback.transactions, normalizeTransaction),
-    budgets: normalizeArray(input.budgets, fallback.budgets, normalizeBudget),
-    bills: normalizeArray(input.bills, fallback.bills, (value, fallbackBill) =>
-      normalizeBill(value, fallbackBill, memberIds, fallbackMemberId)
+    appMode,
+    household: {
+      ...household,
+      setupComplete: appMode === 'onboarding' ? false : household.setupComplete
+    },
+    transactions: normalizeArray(
+      input.transactions,
+      fallback.transactions,
+      normalizeTransaction,
+      missingCollectionFallback ? fallback.transactions : []
     ),
-    tasks: normalizeArray(input.tasks, fallback.tasks, (value, fallbackTask) =>
-      normalizeTask(value, fallbackTask, memberIds, fallbackMemberId)
+    budgets: normalizeArray(input.budgets, fallback.budgets, normalizeBudget, missingCollectionFallback ? fallback.budgets : []),
+    bills: normalizeArray(
+      input.bills,
+      fallback.bills,
+      (value, fallbackBill) => normalizeBill(value, fallbackBill, memberIds, fallbackMemberId),
+      missingCollectionFallback ? fallback.bills : []
     ),
-    goals: normalizeArray(input.goals, fallback.goals, normalizeGoal),
+    tasks: normalizeArray(
+      input.tasks,
+      fallback.tasks,
+      (value, fallbackTask) => normalizeTask(value, fallbackTask, memberIds, fallbackMemberId),
+      missingCollectionFallback ? fallback.tasks : []
+    ),
+    goals: normalizeArray(input.goals, fallback.goals, normalizeGoal, missingCollectionFallback ? fallback.goals : []),
     briefing: fallback.briefing
   };
 
@@ -119,6 +144,15 @@ function looksLikeFamilyOsExport(value: unknown) {
     isRecord(value.household) &&
     ['transactions', 'budgets', 'bills', 'tasks', 'goals'].every((key) => value[key] === undefined || Array.isArray(value[key]))
   );
+}
+
+function normalizeAppMode(value: unknown, input: Record<string, unknown>, household: Household): AppMode {
+  const explicit = oneOf<AppMode>(value, ['onboarding', 'guided-demo', 'demo', 'real'], 'onboarding');
+  if (typeof value === 'string' && ['onboarding', 'guided-demo', 'demo', 'real'].includes(value)) return explicit;
+  if (!household.setupComplete) return 'onboarding';
+  if (household.id === 'household-demo') return 'demo';
+  if (Array.isArray(input.transactions) && input.transactions.some((item) => isRecord(item) && item.id === 'txn-payroll-1')) return 'demo';
+  return 'real';
 }
 
 function normalizeHousehold(value: unknown, fallback: Household): Household {
@@ -228,12 +262,17 @@ function normalizeGoal(value: unknown, fallback: Goal): Goal {
   };
 }
 
-function normalizeArray<T>(value: unknown, fallback: T[], normalize: (value: unknown, fallback: T) => T) {
-  const source = Array.isArray(value) ? value : fallback;
-  const fallbackFirst = fallback[0];
+function normalizeArray<T>(
+  value: unknown,
+  itemFallbacks: T[],
+  normalize: (value: unknown, fallback: T) => T,
+  missingFallback: T[] = itemFallbacks
+) {
+  const source = Array.isArray(value) ? value : missingFallback;
+  const fallbackFirst = itemFallbacks[0] ?? missingFallback[0];
   if (!fallbackFirst) return [] as T[];
   if (source.length === 0) return [];
-  return source.map((item, index) => normalize(item, fallback[index] ?? fallbackFirst));
+  return source.map((item, index) => normalize(item, itemFallbacks[index] ?? fallbackFirst));
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

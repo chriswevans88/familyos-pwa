@@ -9,8 +9,8 @@ import {
   Settings
 } from 'lucide-react';
 import { clsx } from 'clsx';
-import type { AppTab, Household } from '../types';
-import { AppLogo, AvatarStack, IconButton, StatusPill } from './ui';
+import type { AppMode, AppTab, Household } from '../types';
+import { AppLogo, AvatarStack, Button, IconButton, StatusPill } from './ui';
 
 const navItems: Array<{ tab: AppTab; label: string; icon: typeof Home }> = [
   { tab: 'home', label: 'Home', icon: Home },
@@ -23,13 +23,17 @@ const navItems: Array<{ tab: AppTab; label: string; icon: typeof Home }> = [
 
 export function AppShell({
   household,
+  appMode,
   tab,
   setTab,
+  onStartHousehold,
   children
 }: {
   household: Household;
+  appMode: AppMode;
   tab: AppTab;
   setTab: (tab: AppTab) => void;
+  onStartHousehold: () => void;
   children: React.ReactNode;
 }) {
   const headerName = household.name.replace(/^The\s+/i, '').trim();
@@ -75,6 +79,22 @@ export function AppShell({
             </div>
           </div>
         </header>
+
+        {appMode === 'demo' && (
+          <div className="mt-4 rounded-lg border border-cyan-200/20 bg-cyan-300/10 p-3 shadow-glass backdrop-blur-xl">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-black text-white">You&apos;re viewing sample data.</p>
+                <p className="mt-1 text-xs leading-5 text-white/58">
+                  This Morgan household is only a demo. Start fresh when you&apos;re ready to create your own FamilyOS.
+                </p>
+              </div>
+              <Button size="sm" variant="secondary" onClick={onStartHousehold}>
+                Start my household
+              </Button>
+            </div>
+          </div>
+        )}
 
         <main className="flex-1 py-5 sm:py-8">
           <AnimatePresence mode="wait">

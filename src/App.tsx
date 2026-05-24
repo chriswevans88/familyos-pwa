@@ -22,7 +22,7 @@ function tabFromUrl(): AppTab {
 }
 
 export default function App() {
-  const { data, setData, resetDemoData, regenerateBriefing } = useFamilyData();
+  const { data, setData, resetDemoData, startFresh, regenerateBriefing } = useFamilyData();
   const installPrompt = useInstallPrompt();
   const [tab, setTabState] = useState<AppTab>(() => tabFromUrl());
 
@@ -55,6 +55,7 @@ export default function App() {
             data={data}
             setData={setData}
             resetDemoData={resetDemoData}
+            startFresh={startFresh}
             install={installPrompt.install}
             canInstall={installPrompt.canInstall}
             installed={installPrompt.installed}

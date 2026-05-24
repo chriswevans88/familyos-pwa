@@ -1,4 +1,4 @@
-import { createDemoData } from '../data/seed';
+import { createBlankHousehold, createDemoData } from '../data/seed';
 import { generateWeeklyBriefing } from './briefing';
 import type {
   AppData,
@@ -28,10 +28,37 @@ export function createSeededData(setupComplete = true): AppData {
   return withFreshBriefing(createDemoData(setupComplete), 1);
 }
 
+export function createBlankData(household: Partial<Household> = {}): AppData {
+  const baseHousehold = createBlankHousehold();
+  return withFreshBriefing(
+    {
+      household: {
+        ...baseHousehold,
+        ...household,
+        members: household.members && household.members.length > 0 ? household.members : baseHousehold.members
+      },
+      transactions: [],
+      budgets: [],
+      bills: [],
+      tasks: [],
+      goals: [],
+      briefing: {
+        id: 'briefing-blank',
+        generatedAt: new Date().toISOString(),
+        version: 1,
+        summary: '',
+        sections: [],
+        nextAction: ''
+      }
+    },
+    1
+  );
+}
+
 export function loadAppData(): AppData {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return createSeededData(false);
+    if (!raw) return createBlankData({ setupComplete: false });
     return normalizeAppData(JSON.parse(raw), createDemoData(true));
   } catch {
     return createSeededData(true);

@@ -64,9 +64,9 @@ export function GoalsScreen({ data, setData }: GoalsProps) {
     setEditing(null);
   };
 
-  const deleteGoal = (goal: Goal) => {
-    if (!window.confirm(`Delete goal "${goal.name}"?`)) return;
-    setData((current) => ({ ...current, goals: current.goals.filter((item) => item.id !== goal.id) }));
+  const deleteGoal = (goalId: string) => {
+    setData((current) => ({ ...current, goals: current.goals.filter((item) => item.id !== goalId) }));
+    if (contribution?.goal.id === goalId) setContribution(null);
   };
 
   const addContribution = () => {
@@ -164,7 +164,7 @@ export function GoalsScreen({ data, setData }: GoalsProps) {
                       <IconButton label={`Edit ${goal.name}`} onClick={() => setEditing(toForm(goal))}>
                         <Edit3 size={16} />
                       </IconButton>
-                      <IconButton label={`Delete ${goal.name}`} onClick={() => deleteGoal(goal)}>
+                      <IconButton label={`Delete ${goal.name}`} onClick={() => deleteGoal(goal.id)}>
                         <Trash2 size={16} />
                       </IconButton>
                     </div>

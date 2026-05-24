@@ -15,6 +15,51 @@ import {
 } from './calculations';
 
 export function generateWeeklyBriefing(data: AppData, version = 1): BriefingSnapshot {
+  const isBlankHousehold =
+    data.transactions.length === 0 &&
+    data.budgets.length === 0 &&
+    data.bills.length === 0 &&
+    data.tasks.length === 0 &&
+    data.goals.length === 0;
+
+  if (isBlankHousehold) {
+    return {
+      id: `briefing-${Date.now()}-${version}`,
+      generatedAt: new Date().toISOString(),
+      version,
+      summary:
+        `${data.household.name} is ready for setup. Add the first transaction, recurring bill, task, or goal and FamilyOS will turn it into a weekly operating report.`,
+      sections: [
+        {
+          title: 'Financial Pulse',
+          accent: '#22d3ee',
+          body: 'No income or spending has been added yet. Start with one income entry or one common expense to create the first cashflow signal.'
+        },
+        {
+          title: 'Upcoming Obligations',
+          accent: '#f5c542',
+          body: 'No recurring bills are being tracked yet. Add rent, mortgage, utilities, subscriptions, or insurance to turn on payment radar.'
+        },
+        {
+          title: 'Task Load',
+          accent: '#6ee7b7',
+          body: 'No chores or responsibilities are assigned yet. Add one daily or weekly task to make family load visible.'
+        },
+        {
+          title: 'Goal Momentum',
+          accent: '#fb7185',
+          body: 'No family goals are active yet. Create a shared goal such as emergency savings, a trip, or a home project.'
+        },
+        {
+          title: 'Tonight Win',
+          accent: '#a78bfa',
+          body: 'Add one real household item now. FamilyOS becomes more useful as soon as the first signal is in place.'
+        }
+      ],
+      nextAction: 'Add one transaction, recurring bill, task, or goal to start the household operating picture.'
+    };
+  }
+
   const totals = totalsForMonth(data.transactions);
   const topSpend = spendByCategory(data.transactions)[0];
   const bills = upcomingBills(data.bills, 10);

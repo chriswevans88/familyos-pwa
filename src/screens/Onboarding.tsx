@@ -1,7 +1,7 @@
 import { Banknote, CalendarClock, CheckSquare, Flag, Newspaper, Plus, Smartphone, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { memberPalette } from '../data/seed';
-import { createSeededData, withFreshBriefing } from '../lib/storage';
+import { createBlankData, createSeededData } from '../lib/storage';
 import type { AppData, Member } from '../types';
 import { AppLogo, Button, Card, Field, IconButton, StatusPill } from '../components/ui';
 
@@ -54,33 +54,13 @@ export function Onboarding({
         avatar: (member.name.trim().charAt(0) || `${index + 1}`).toUpperCase()
       }))
       .slice(0, 8);
-    const fallbackMember = cleanMembers[0]?.id;
     setData((current) =>
-      withFreshBriefing(
-        {
-          ...current,
-          household: {
-            ...current.household,
-            name: name.trim() || 'Our Household',
-            members: cleanMembers,
-            setupComplete: true
-          },
-          tasks: current.tasks.map((task) => ({
-            ...task,
-            assignedTo: cleanMembers.some((member) => member.id === task.assignedTo)
-              ? task.assignedTo
-              : fallbackMember ?? task.assignedTo
-          })),
-          bills: current.bills.map((bill) => ({
-            ...bill,
-            ownerId:
-              bill.ownerId && cleanMembers.some((member) => member.id === bill.ownerId)
-                ? bill.ownerId
-                : fallbackMember
-          }))
-        },
-        current.briefing.version + 1
-      )
+      createBlankData({
+        ...current.household,
+        name: name.trim() || 'Our Household',
+        members: cleanMembers,
+        setupComplete: true
+      })
     );
   };
 

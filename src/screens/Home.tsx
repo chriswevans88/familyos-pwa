@@ -395,26 +395,38 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
             }
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            {data.goals.slice(0, 4).map((goal) => (
-              <Card key={goal.id} interactive className="p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: goal.color }} />
-                      <StatusPill tone={goalProgress(goal) >= 70 ? 'green' : 'white'}>
-                        {goalProgress(goal) >= 70 ? 'Closing in' : 'Building'}
-                      </StatusPill>
-                    </div>
-                    <h3 className="truncate text-lg font-black text-white">{goal.name}</h3>
-                    <p className="text-sm text-white/50">
-                      {money(goal.current)} of {money(goal.target)}
-                    </p>
-                  </div>
-                  <ProgressRing value={goalProgress(goal)} label="Funded" color={goal.color} size={78} />
-                </div>
-                <ProgressBar value={goalProgress(goal)} color={goal.color} className="mt-4" />
+            {data.goals.length === 0 ? (
+              <Card interactive className="p-4 sm:col-span-2">
+                <button className="w-full text-left" onClick={() => setTab('goals')}>
+                  <StatusPill tone="violet">First goal</StatusPill>
+                  <h3 className="mt-3 text-lg font-black text-white">Create a shared target.</h3>
+                  <p className="mt-2 text-sm leading-6 text-white/58">
+                    Add a vacation, emergency fund, home project, or holiday fund to make progress visible.
+                  </p>
+                </button>
               </Card>
-            ))}
+            ) : (
+              data.goals.slice(0, 4).map((goal) => (
+                <Card key={goal.id} interactive className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full" style={{ backgroundColor: goal.color }} />
+                        <StatusPill tone={goalProgress(goal) >= 70 ? 'green' : 'white'}>
+                          {goalProgress(goal) >= 70 ? 'Closing in' : 'Building'}
+                        </StatusPill>
+                      </div>
+                      <h3 className="truncate text-lg font-black text-white">{goal.name}</h3>
+                      <p className="text-sm text-white/50">
+                        {money(goal.current)} of {money(goal.target)}
+                      </p>
+                    </div>
+                    <ProgressRing value={goalProgress(goal)} label="Funded" color={goal.color} size={78} />
+                  </div>
+                  <ProgressBar value={goalProgress(goal)} color={goal.color} className="mt-4" />
+                </Card>
+              ))
+            )}
           </div>
         </section>
       </section>
@@ -429,15 +441,24 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
             <PiggyBank className="text-cyan-200" size={28} />
           </div>
           <div className="mt-5 grid gap-3">
-            {budgetStatus.slice(0, 5).map((item) => (
-              <div key={item.budget.id}>
-                <div className="mb-1 flex justify-between text-xs text-white/55">
-                  <span>{item.budget.category}</span>
-                  <span>{money(item.spent)} / {money(item.budget.limit)}</span>
+            {budgetStatus.length === 0 ? (
+              <button
+                className="rounded-lg border border-white/10 bg-white/10 p-4 text-left text-sm leading-6 text-white/62 transition hover:bg-white/15"
+                onClick={() => setTab('money')}
+              >
+                Add the first income or expense to start the household money picture.
+              </button>
+            ) : (
+              budgetStatus.slice(0, 5).map((item) => (
+                <div key={item.budget.id}>
+                  <div className="mb-1 flex justify-between text-xs text-white/55">
+                    <span>{item.budget.category}</span>
+                    <span>{money(item.spent)} / {money(item.budget.limit)}</span>
+                  </div>
+                  <ProgressBar value={item.ratio * 100} color={item.ratio > 1 ? '#fb7185' : item.budget.color} />
                 </div>
-                <ProgressBar value={item.ratio * 100} color={item.ratio > 1 ? '#fb7185' : item.budget.color} />
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </Card>
 

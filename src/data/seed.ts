@@ -10,12 +10,12 @@ export const memberPalette = ['#22d3ee', '#6ee7b7', '#f5c542', '#fb7185', '#a78b
 export function createBlankHousehold(): Household {
   return {
     id: id('household'),
-    name: 'The Morgan Household',
+    name: 'Our Household',
     setupComplete: false,
     theme: 'dark',
     members: [
-      { id: id('member'), name: 'Avery', role: 'Parent', color: memberPalette[0], avatar: 'A' },
-      { id: id('member'), name: 'Jordan', role: 'Parent', color: memberPalette[1], avatar: 'J' }
+      { id: id('member'), name: '', role: 'Parent', color: memberPalette[0], avatar: '?' },
+      { id: id('member'), name: '', role: 'Parent', color: memberPalette[1], avatar: '?' }
     ]
   };
 }

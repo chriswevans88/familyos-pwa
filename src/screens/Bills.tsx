@@ -64,9 +64,8 @@ export function BillsScreen({ data, setData }: BillsProps) {
     setEditing(null);
   };
 
-  const deleteBill = (bill: RecurringBill) => {
-    if (!window.confirm(`Delete recurring bill "${bill.name}"?`)) return;
-    setData((current) => ({ ...current, bills: current.bills.filter((item) => item.id !== bill.id) }));
+  const deleteBill = (billId: string) => {
+    setData((current) => ({ ...current, bills: current.bills.filter((item) => item.id !== billId) }));
   };
 
   return (
@@ -127,7 +126,10 @@ export function BillsScreen({ data, setData }: BillsProps) {
         <Card className="p-5">
           <SectionHeader title="Recurring payments" eyebrow="Ledger" />
           <div className="mt-4 grid gap-3">
-            {data.bills
+            {data.bills.length === 0 ? (
+              <EmptyState title="No recurring bills yet" body="Add the first rent, mortgage, utility, or subscription to turn on payment radar." icon={<CalendarClock size={22} />} />
+            ) : (
+              data.bills
               .slice()
               .sort((a, b) => nextBillDueDate(a).getTime() - nextBillDueDate(b).getTime())
               .map((bill) => {
@@ -157,13 +159,14 @@ export function BillsScreen({ data, setData }: BillsProps) {
                       <IconButton label={`Edit ${bill.name}`} onClick={() => setEditing(toForm(bill))}>
                         <Edit3 size={16} />
                       </IconButton>
-                      <IconButton label={`Delete ${bill.name}`} onClick={() => deleteBill(bill)}>
+                      <IconButton label={`Delete ${bill.name}`} onClick={() => deleteBill(bill.id)}>
                         <Trash2 size={16} />
                       </IconButton>
                     </div>
                   </div>
                 );
-              })}
+              })
+            )}
           </div>
         </Card>
 

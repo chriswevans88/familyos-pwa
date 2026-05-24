@@ -80,9 +80,8 @@ export function TasksScreen({ data, setData }: TasksProps) {
     setEditing(null);
   };
 
-  const deleteTask = (task: FamilyTask) => {
-    if (!window.confirm(`Delete task "${task.title}"?`)) return;
-    setData((current) => ({ ...current, tasks: current.tasks.filter((item) => item.id !== task.id) }));
+  const deleteTask = (taskId: string) => {
+    setData((current) => ({ ...current, tasks: current.tasks.filter((item) => item.id !== taskId) }));
   };
 
   return (
@@ -206,7 +205,7 @@ export function TasksScreen({ data, setData }: TasksProps) {
                       <IconButton label={`Edit ${task.title}`} onClick={() => setEditing(toForm(task, data.household.members[0]?.id))}>
                         <Edit3 size={16} />
                       </IconButton>
-                      <IconButton label={`Delete ${task.title}`} onClick={() => deleteTask(task)}>
+                      <IconButton label={`Delete ${task.title}`} onClick={() => deleteTask(task.id)}>
                         <Trash2 size={16} />
                       </IconButton>
                     </div>

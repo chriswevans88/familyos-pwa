@@ -82,11 +82,10 @@ export function MoneyScreen({ data, setData }: MoneyProps) {
     setEditing(null);
   };
 
-  const deleteTransaction = (transaction: Transaction) => {
-    if (!window.confirm(`Delete "${transaction.description}"?`)) return;
+  const deleteTransaction = (transactionId: string) => {
     setData((current) => ({
       ...current,
-      transactions: current.transactions.filter((item) => item.id !== transaction.id)
+      transactions: current.transactions.filter((item) => item.id !== transactionId)
     }));
   };
 
@@ -167,6 +166,9 @@ export function MoneyScreen({ data, setData }: MoneyProps) {
                 </div>
               );
             })}
+            {data.budgets.length === 0 && (
+              <EmptyState title="No budget lines yet" body="Add your first transaction to begin building the household money picture." icon={<WalletCards size={22} />} />
+            )}
           </div>
         </Card>
       </section>
@@ -211,19 +213,25 @@ export function MoneyScreen({ data, setData }: MoneyProps) {
 
         <Card className="p-5">
           <SectionHeader title="Recent transactions" eyebrow="Ledger" />
-          <ChartBox height={192}>
-            {(width, height) => (
-              <BarChart width={width} height={height} data={monthBars} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
-                <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  formatter={(value) => money(Number(value))}
-                  contentStyle={{ background: '#10131b', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8 }}
-                />
-                <Bar dataKey="amount" radius={[6, 6, 2, 2]} fill="#22d3ee" />
-              </BarChart>
-            )}
-          </ChartBox>
+          {data.transactions.length === 0 ? (
+            <div className="mt-4">
+              <EmptyState title="No transactions yet" body="Add income or an expense to start the household ledger." icon={<ReceiptText size={22} />} />
+            </div>
+          ) : (
+            <ChartBox height={192}>
+              {(width, height) => (
+                <BarChart width={width} height={height} data={monthBars} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
+                  <XAxis dataKey="date" tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill: 'rgba(255,255,255,0.45)', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    formatter={(value) => money(Number(value))}
+                    contentStyle={{ background: '#10131b', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8 }}
+                  />
+                  <Bar dataKey="amount" radius={[6, 6, 2, 2]} fill="#22d3ee" />
+                </BarChart>
+              )}
+            </ChartBox>
+          )}
           <div className="mt-4 grid gap-3">
             {data.transactions
               .slice()
@@ -245,7 +253,7 @@ export function MoneyScreen({ data, setData }: MoneyProps) {
                     <IconButton label={`Edit ${transaction.description}`} onClick={() => setEditing(toForm(transaction))}>
                       <Edit3 size={16} />
                     </IconButton>
-                    <IconButton label={`Delete ${transaction.description}`} onClick={() => deleteTransaction(transaction)}>
+                    <IconButton label={`Delete ${transaction.description}`} onClick={() => deleteTransaction(transaction.id)}>
                       <Trash2 size={16} />
                     </IconButton>
                   </div>

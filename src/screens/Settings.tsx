@@ -30,6 +30,7 @@ type SettingsProps = {
   data: AppData;
   setData: React.Dispatch<React.SetStateAction<AppData>>;
   resetDemoData: () => void;
+  startFresh: () => void;
   install: () => Promise<boolean>;
   canInstall: boolean;
   installed: boolean;
@@ -39,6 +40,7 @@ export function SettingsScreen({
   data,
   setData,
   resetDemoData,
+  startFresh,
   install,
   canInstall,
   installed
@@ -337,6 +339,17 @@ export function SettingsScreen({
               }}
             >
               Reset demo data
+            </Button>
+            <Button
+              variant="danger"
+              icon={<Trash2 size={16} />}
+              onClick={() => {
+                if (window.confirm('Start fresh? This removes all FamilyOS data on this device and returns to setup. Export a backup first if you want to keep anything.')) {
+                  startFresh();
+                }
+              }}
+            >
+              Start fresh
             </Button>
             <Button
               variant="secondary"

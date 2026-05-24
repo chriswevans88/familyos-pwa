@@ -137,6 +137,7 @@ export function Button({
   variant = 'primary',
   size = 'md',
   icon,
+  type = 'button',
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -145,6 +146,7 @@ export function Button({
 }) {
   return (
     <button
+      type={type}
       className={clsx(
         'inline-flex min-h-10 items-center justify-center gap-2 rounded-lg font-semibold transition duration-200',
         'focus:outline-none focus:ring-2 focus:ring-cyan-300/70 disabled:cursor-not-allowed disabled:opacity-50',
@@ -170,16 +172,23 @@ export function IconButton({
   label,
   children,
   className,
+  onClick,
+  type = 'button',
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { label: string; children: ReactNode }) {
   return (
     <button
+      type={type}
       aria-label={label}
       title={label}
       className={clsx(
-        'grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white active:scale-95',
+        'grid h-10 w-10 place-items-center rounded-lg border border-white/10 bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white active:scale-95 disabled:cursor-not-allowed disabled:opacity-45',
         className
       )}
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick?.(event);
+      }}
       {...props}
     >
       {children}

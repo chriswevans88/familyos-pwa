@@ -6,16 +6,24 @@ import {
   CalendarClock,
   CheckCircle2,
   ChevronRight,
+  Copy,
+  ExternalLink,
+  FileJson,
   Gauge,
+  Link2,
   MoonStar,
   PiggyBank,
+  QrCode,
   ShieldCheck,
+  Share2,
   Sparkles,
   Target,
   TrendingUp,
   Users,
   WalletCards
 } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
+import { useState } from 'react';
 import type { AppData, AppTab, Member } from '../types';
 import {
   budgetBreathingRoom,
@@ -34,7 +42,21 @@ import {
 import { AnimatedValue, AvatarStack, Button, Card, ProgressBar, SectionHeader, StatusPill } from '../components/ui';
 import { ProgressRing } from '../components/ProgressRing';
 
+const LIVE_APP_URL = 'https://familyos-pwa.vercel.app';
+const SHARE_COPY =
+  'FamilyOS brings household money, bills, tasks, goals, and weekly briefings into one practical command center.';
+
+const differencePoints = [
+  { label: 'Money', body: 'Cashflow, budgets, categories, and realistic monthly spend.' },
+  { label: 'Bills', body: 'Recurring obligations with due dates, owners, autopay, and due-soon pressure.' },
+  { label: 'Tasks', body: 'Family responsibilities, assignment, completion, and momentum.' },
+  { label: 'Goals', body: 'Shared savings targets with progress and contribution flows.' },
+  { label: 'Briefing', body: 'A weekly operating report generated from the current household data.' },
+  { label: 'Portable', body: 'Installable PWA, local persistence, JSON backup, import, and QR sharing.' }
+];
+
 export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppTab) => void }) {
+  const [shareStatus, setShareStatus] = useState('');
   const totals = totalsForMonth(data.transactions);
   const todayTasks = tasksDue(data.tasks, 'today');
   const weekTasks = tasksDue(data.tasks, 'week');
@@ -53,6 +75,38 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
   const topGoal = data.goals
     .slice()
     .sort((a, b) => goalProgress(b) - goalProgress(a))[0];
+
+  const showShareStatus = (value: string) => {
+    setShareStatus(value);
+    window.setTimeout(() => setShareStatus(''), 2400);
+  };
+
+  const copyDemoLink = async () => {
+    await navigator.clipboard.writeText(LIVE_APP_URL);
+    showShareStatus('Copied live demo link');
+  };
+
+  const shareDemo = async () => {
+    if (!navigator.share) {
+      await copyDemoLink();
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: 'FamilyOS',
+        text: SHARE_COPY,
+        url: LIVE_APP_URL
+      });
+      showShareStatus('Opened share sheet');
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        showShareStatus('Share dismissed');
+        return;
+      }
+      await copyDemoLink();
+    }
+  };
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1.35fr_0.85fr]">
@@ -79,10 +133,10 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
                   {format(new Date(), 'MMMM d')} household briefing
                 </p>
                 <h2 className="mt-3 max-w-2xl text-4xl font-black leading-[0.96] text-white sm:text-6xl">
-                  {displayName} is running at command-center speed.
+                  Not an expense tracker. A household operating view.
                 </h2>
                 <p className="mt-4 max-w-xl text-base leading-7 text-white/72">
-                  Money, bills, chores, goals, and tonight&apos;s family move are synced into one operating view.
+                  {displayName} sees cashflow, bills, chores, goals, and tonight&apos;s next move in one practical command center.
                 </p>
               </div>
 
@@ -114,7 +168,7 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
                   </div>
                 </div>
                 <Button size="sm" variant="secondary" icon={<Sparkles size={15} />} onClick={() => setTab('briefing')}>
-                  Sunday report
+                  Weekly briefing
                 </Button>
               </div>
             </div>
@@ -152,6 +206,71 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
             </div>
           </div>
         </Card>
+
+        <section className="grid gap-3 lg:grid-cols-[1.06fr_0.94fr]">
+          <Card className="p-5" shine>
+            <SectionHeader eyebrow="Why FamilyOS is different" title="One household picture, not one ledger." />
+            <p className="mt-3 text-sm leading-6 text-white/62">
+              The demo works because every visible signal is connected: money affects budget room, bills create pressure,
+              tasks show family load, goals track momentum, and the briefing explains what to do next.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {differencePoints.map((point) => (
+                <div key={point.label} className="rounded-lg border border-white/10 bg-white/10 p-3">
+                  <p className="text-sm font-black text-white">{point.label}</p>
+                  <p className="mt-1 text-xs leading-5 text-white/55">{point.body}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <Card
+            shine
+            className="isolate border-emerald-200/20 bg-[linear-gradient(135deg,rgba(110,231,183,0.14),rgba(255,255,255,0.08)_48%,rgba(103,232,249,0.12))] p-5"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <StatusPill tone="green">Show this to someone</StatusPill>
+              <StatusPill tone="cyan">30 seconds</StatusPill>
+            </div>
+            <h3 className="mt-3 text-2xl font-black leading-tight text-white">A quick walkthrough that lands the point.</h3>
+            <div className="mt-4 grid gap-3 text-sm leading-6 text-white/64">
+              <DemoLine step="1" text="Start on Home: health score, Tonight's Win, budget room, bills, tasks, and goals." />
+              <DemoLine step="2" text="Tap Money, Bills, Tasks, and Goals: each area has real editable household data." />
+              <DemoLine step="3" text="Open Briefing and Settings: operating report, installable PWA, backup, import, and QR sharing." />
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-[auto_1fr] sm:items-center">
+              <div className="w-full max-w-[9.5rem] rounded-lg border border-white/10 bg-white p-2">
+                <QRCodeSVG value={LIVE_APP_URL} size={136} bgColor="#ffffff" fgColor="#090b10" level="M" marginSize={2} />
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/35 p-3 text-xs text-white/72">
+                  <Link2 size={15} className="shrink-0 text-cyan-200" />
+                  <span className="min-w-0 truncate">{LIVE_APP_URL}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button size="sm" icon={<Copy size={15} />} onClick={copyDemoLink}>
+                    Copy
+                  </Button>
+                  <Button size="sm" variant="secondary" icon={<Share2 size={15} />} onClick={shareDemo}>
+                    Share
+                  </Button>
+                  <Button size="sm" variant="secondary" icon={<QrCode size={15} />} onClick={() => setTab('settings')}>
+                    QR
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    icon={<ExternalLink size={15} />}
+                    onClick={() => window.open(LIVE_APP_URL, '_blank', 'noopener,noreferrer')}
+                  >
+                    Open
+                  </Button>
+                </div>
+                {shareStatus && <p className="rounded-lg bg-emerald-300/10 p-2 text-xs font-semibold text-emerald-100">{shareStatus}</p>}
+              </div>
+            </div>
+          </Card>
+        </section>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
@@ -373,7 +492,34 @@ export function HomeScreen({ data, setTab }: { data: AppData; setTab: (tab: AppT
             Move or earmark this before {format(addDays(new Date(), 2), 'EEEE')} so extra cash does not disappear into everyday spend.
           </p>
         </Card>
+
+        <Card className="p-5">
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-violet-300 text-ink-950">
+              <FileJson size={20} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-violet-100/80">Portable demo</p>
+              <h3 className="font-black text-white">Install, share, backup</h3>
+            </div>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-white/58">
+            Settings includes Home Screen install help, the live QR code, JSON export/import, and reset-to-demo controls.
+          </p>
+          <Button className="mt-4 w-full" variant="secondary" onClick={() => setTab('settings')} icon={<ArrowRight size={16} />}>
+            Open sharing and backup
+          </Button>
+        </Card>
       </aside>
+    </div>
+  );
+}
+
+function DemoLine({ step, text }: { step: string; text: string }) {
+  return (
+    <div className="grid grid-cols-[1.75rem_1fr] gap-3">
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-cyan-300 text-xs font-black text-ink-950">{step}</span>
+      <p>{text}</p>
     </div>
   );
 }

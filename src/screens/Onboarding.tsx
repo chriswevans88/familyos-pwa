@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react';
+import { Banknote, CalendarClock, CheckSquare, Flag, Newspaper, Plus, Smartphone, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { memberPalette } from '../data/seed';
 import { createSeededData, withFreshBriefing } from '../lib/storage';
@@ -12,6 +12,15 @@ const makeMember = (index: number): Member => ({
   color: memberPalette[index % memberPalette.length],
   avatar: '?'
 });
+
+const welcomeSignals = [
+  { label: 'Money', icon: Banknote },
+  { label: 'Bills', icon: CalendarClock },
+  { label: 'Tasks', icon: CheckSquare },
+  { label: 'Goals', icon: Flag },
+  { label: 'Briefing', icon: Newspaper },
+  { label: 'PWA', icon: Smartphone }
+];
 
 export function Onboarding({
   data,
@@ -87,8 +96,19 @@ export function Onboarding({
           </div>
           <h1 className="mt-2 text-3xl font-black text-white sm:text-5xl">Run the household. Beautifully.</h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/68 sm:text-base">
-            Set up the people who keep the week moving, or jump straight into the premium demo household.
+            Not another expense tracker. FamilyOS brings money, bills, tasks, goals, and the weekly family briefing into one practical command center.
           </p>
+          <div className="mx-auto mt-4 grid max-w-xl grid-cols-3 gap-2 sm:grid-cols-6">
+            {welcomeSignals.map((signal) => {
+              const Icon = signal.icon;
+              return (
+                <div key={signal.label} className="grid place-items-center gap-1 rounded-lg border border-white/10 bg-white/10 px-2 py-3">
+                  <Icon size={17} className="text-cyan-200" />
+                  <span className="text-[11px] font-bold text-white/72">{signal.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <Card className="p-4 sm:p-6">

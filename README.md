@@ -87,13 +87,17 @@ https://familyos-pwa.vercel.app
 ## Demo Script
 
 1. Open FamilyOS and tap “Skip with demo household.”
-2. On Home, show the command-center hero, Household Health Score, Tonight’s Win, family avatars, budget room, and Sunday report.
+2. On Home, show the “Why FamilyOS is different” section: money, bills, tasks, goals, briefing, install, local data, backup, and QR sharing.
 3. Tap Money, add a small expense, refresh the app, and show the transaction persists.
 4. Tap Bills to show due-soon status, autopay/manual ownership, and recurring obligations.
 5. Tap Tasks, complete a responsibility, and show momentum/streak behavior.
 6. Tap Goals, add a contribution, and show goal progress update instantly.
 7. Tap Brief, regenerate the operating report, then copy or export it.
 8. Tap Settings to show phone install steps, JSON backup/import, and reset demo data.
+
+## 30-Second Walkthrough
+
+“This is FamilyOS. It is not just an expense tracker: it puts money, recurring bills, chores, goals, and the weekly household briefing in one operating view. On Home, the health score, Tonight’s Win, payment radar, and task handoff show what needs attention now. Then each tab has real editable data that persists on this device. Settings makes it demo-ready: install it as a PWA, share the live QR code, export a backup, import data, or reset the polished demo.”
 
 ## 60-Second Talk Track
 

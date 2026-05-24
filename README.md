@@ -29,6 +29,7 @@ Production checks:
 
 ```bash
 npm run lint
+npm run typecheck
 npm run build
 ```
 
@@ -42,7 +43,9 @@ npm run preview
 
 1. Push this repository to GitHub.
 2. Create a new Vercel project from the repo.
-3. Use the default Vite settings:
+3. Use these exact Vercel settings:
+   - Framework: `Vite`
+   - Install command: `npm install`
    - Build command: `npm run build`
    - Output directory: `dist`
 4. Deploy.
@@ -66,16 +69,16 @@ On Android or desktop Chrome:
 2. Use the browser Install prompt or install icon.
 3. Launch FamilyOS as a standalone app.
 
-## Demo Script For A Phone
+## Demo Script
 
 1. Open FamilyOS and tap “Skip with demo household.”
-2. Pause on the dashboard: show the household health score, cashflow cards, today queue, goals, and Sunday Briefing.
-3. Tap Money: add a small expense, then refresh to show localStorage persistence.
-4. Tap Bills: point out due-soon highlighting and autopay/manual ownership.
-5. Tap Tasks: complete one task and show the streak/momentum change.
-6. Tap Goals: add a contribution to a goal and show progress update.
-7. Tap Brief: regenerate the executive-style weekly briefing, then copy or export it.
-8. Tap Settings: show install help, theme choices, JSON export/import, and reset demo data.
+2. On Home, show the command-center hero, Household Health Score, Tonight’s Win, family avatars, budget room, and Sunday report.
+3. Tap Money, add a small expense, refresh the app, and show the transaction persists.
+4. Tap Bills to show due-soon status, autopay/manual ownership, and recurring obligations.
+5. Tap Tasks, complete a responsibility, and show momentum/streak behavior.
+6. Tap Goals, add a contribution, and show goal progress update instantly.
+7. Tap Brief, regenerate the operating report, then copy or export it.
+8. Tap Settings to show phone install steps, JSON backup/import, and reset demo data.
 
 ## Data Model
 
